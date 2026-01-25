@@ -13,6 +13,9 @@
 **詳細な分析ロジック、数理モデルの解説、およびトリアージ戦略の提言書**
 > **[👉 Download PDF: 戦略的組織レジリエンス構築レポート (Ver.4)](report/Strategic_Org_Resilience_Report.pdf)**
 
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://strategic-org-resilience-9ejs4h2kqqpx5zdwuygri9.streamlit.app/)
+
+> **👆 Click to Run App**: ブラウザ上で「組織崩壊シミュレーション」を体験できます。
 ---
 
 ## 📊 Key Simulation Results
