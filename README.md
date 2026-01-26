@@ -42,3 +42,24 @@
 ### 📂 Source Code
 - **[simulation_negative_chain.py](python/simulation_negative_chain.py)**
   負の連鎖（デススパイラル）と財務損失を計算するシミュレーションのソースコード。
+
+  ---
+
+## 🚀 Web Application (Simulator Ver.2.0)
+
+本レポートの数理モデルをブラウザ上で体験できるインタラクティブ・シミュレーターを実装しました。
+Ver.1.0（単なる人数計算）とは異なり、**「有効組織能力 (Effective Capacity)」**と**「不可逆性 (Irreversibility)」**を組み込んだ研究用モデルです。
+
+### Key Logic (Ver.2.0):
+1. **不可逆性 (Irreversibility)**:
+   - 「退職者を即座に補充しても、組織能力は回復しない」という現実を再現。
+   - 新規採用者の戦力化期間 (Ramp-up Period) を変数化し、生産性の遅れ（Learning Curve）を考慮。
+2. **非線形な燃え尽き (Non-linear Burnout)**:
+   - 業務負荷が閾値を超えると、離職確率が「指数関数的」に上昇する数理モデルを実装。
+   - 組織が一気に崩壊する「ティッピング・ポイント」を予見可能。
+
+### 🛠 Usage
+```bash
+# Run locally
+pip install -r requirements.txt
+streamlit run app.py
