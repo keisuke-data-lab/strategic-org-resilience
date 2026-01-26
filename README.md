@@ -13,6 +13,9 @@
 **詳細な分析ロジック、数理モデルの解説、およびトリアージ戦略の提言書**
 > **[👉 Download PDF: 戦略的組織レジリエンス構築レポート (Ver.4)](report/Strategic_Org_Resilience_Report.pdf)**
 
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://strategic-org-resilience-9ejs4h2kqqpx5zdwuygri9.streamlit.app/)
+
+> **👆 Click to Run App**: ブラウザ上で「組織崩壊シミュレーション」を体験できます。
 ---
 
 ## 📊 Key Simulation Results
@@ -42,6 +45,7 @@
 ### 📂 Source Code
 - **[simulation_negative_chain.py](python/simulation_negative_chain.py)**
   負の連鎖（デススパイラル）と財務損失を計算するシミュレーションのソースコード。
+<<<<<<< HEAD
 
   ---
 
@@ -63,3 +67,5 @@ Ver.1.0（単なる人数計算）とは異なり、**「有効組織能力 (Eff
 # Run locally
 pip install -r requirements.txt
 streamlit run app.py
+=======
+>>>>>>> 7e0254c5332a9cb61c5cd4148b19fb77906b2470
