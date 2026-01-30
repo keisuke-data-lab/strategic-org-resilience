@@ -2,24 +2,24 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
-import plotly.express as px
+from plotly.subplots import make_subplots
 import time
 
 # ページ設定
 st.set_page_config(
-    page_title="Strategic Org Resilience Simulator Ver.3.2",
-    page_icon="📉",
+    page_title="Strategic Org Resilience Simulator Ver.4.0",
+    page_icon="🛡️",
     layout="wide"
 )
 
 # ==========================================
-# 1. シミュレーション・ロジック (Ver.3.2)
+# 1. シミュレーション・ロジック (Ver.4.0)
 # ==========================================
 
 class AdvancedOrgModel:
     """
     レポート「戦略的組織レジリエンスの構築」完全準拠モデル
-    Ver.3.2: 小規模組織対応版
+    Ver.4.0: 生存分析・ヒートマップ対応版
     """
     
     def __init__(self, n_employees, base_turnover, lead_time, hp_ratio, 
@@ -48,6 +48,7 @@ class AdvancedOrgModel:
         cap_tenured = tenured_count * 1.0
         cap_new = 0
         for hire in new_hires:
+            # 習熟度曲線 (S字カーブの簡易版: 線形近似)
             proficiency = min(1.0, 0.2 + 0.8 * (hire['tenure'] / hire['ramp_up_target']))
             cap_new += proficiency
         return cap_tenured + cap_new
@@ -55,6 +56,9 @@ class AdvancedOrgModel:
     def run_simulation(self, duration_months=36):
         n_hp = int(self.initial_n * self.hp_ratio)
         n_mp = self.initial_n - n_hp
+        
+        # 初期メンバーの生存数追跡用
+        initial_cohort = {'HP': n_hp, 'MP': n_mp}
         
         state = {
             'HP': {'tenured': n_hp, 'new_hires': []}, 
@@ -67,9 +71,7 @@ class AdvancedOrgModel:
         initial_capacity_mp = n_mp * 1.0
         total_initial_capacity = initial_capacity_hp + initial_capacity_mp
         
-        # 小規模組織でのゼロ除算エラー回避
-        if total_initial_capacity == 0:
-            total_initial_capacity = 1.0
+        if total_initial_capacity == 0: total_initial_capacity = 1.0
         
         history = []
         
@@ -81,7 +83,7 @@ class AdvancedOrgModel:
         collapse_month = None
 
         for month in range(duration_months):
-            # 予算コスト計算
+            # 予算計算
             expected_leavers_hp = self.initial_n * self.hp_ratio * self.base_turnover_monthly
             expected_leavers_mp = self.initial_n * (1 - self.hp_ratio) * self.base_turnover_monthly
             
@@ -118,12 +120,15 @@ class AdvancedOrgModel:
                 prob = self.base_turnover_monthly
                 stress_factor = max(0, workload_index - 1.0) 
                 sensitivity = self.sensitivity_hp if type_ == 'HP' else self.sensitivity_mp
+                # ストレスによる離職率の非線形増加
                 prob_adjusted = min(1.0, prob * (1 + sensitivity * (stress_factor * 10)**1.5))
                 
+                # ベテラン離職
                 n_tenured = state[type_]['tenured']
                 leavers_tenured = np.random.binomial(n_tenured, prob_adjusted)
                 state[type_]['tenured'] -= leavers_tenured
                 
+                # 新人離職 (定着失敗)
                 n_new = len(state[type_]['new_hires'])
                 leavers_new = np.random.binomial(n_new, min(1.0, prob_adjusted * 1.2))
                 if leavers_new > 0:
@@ -135,6 +140,13 @@ class AdvancedOrgModel:
                 leavers[type_] = total_leavers
                 for _ in range(total_leavers):
                     vacancies.append({'type': type_, 'months_open': 0})
+                
+                # --- 生存分析用ロジック ---
+                current_total = n_tenured + n_new
+                if current_total > 0:
+                    ratio_initial = initial_cohort[type_] / (current_total + total_leavers)
+                    leavers_from_initial = int(total_leavers * ratio_initial)
+                    initial_cohort[type_] = max(0, initial_cohort[type_] - leavers_from_initial)
 
             # 採用プロセス
             filled_vacancies = []
@@ -165,37 +177,44 @@ class AdvancedOrgModel:
             monthly_opp_loss = total_salary_roll * 2 * (1.0 - cap_ratio)
             cum_opp_loss += monthly_opp_loss
 
+            # 現在のヘッドカウント計算 (※ここが修正ポイント)
+            current_hp = state['HP']['tenured'] + len(state['HP']['new_hires'])
+            current_mp = state['MP']['tenured'] + len(state['MP']['new_hires'])
+
             history.append({
                 'month': month + 1,
                 'capacity_ratio': cap_ratio * 100,
                 'workload_index': workload_index * 100,
-                'leavers': leavers['HP'] + leavers['MP'],
+                'leavers_total': leavers['HP'] + leavers['MP'],
                 'cum_actual_cost': cum_actual_cost,
                 'cum_budget_cost': cum_budget_cost,
                 'cum_excess_cost': max(0, cum_actual_cost - cum_budget_cost), 
                 'cum_opportunity_loss': cum_opp_loss,
-                'headcount_hp': state['HP']['tenured'] + len(state['HP']['new_hires']),
-                'headcount_mp': state['MP']['tenured'] + len(state['MP']['new_hires']),
+                # 生存分析用データ
+                'survivors_hp': initial_cohort['HP'],
+                'survivors_mp': initial_cohort['MP'],
+                'survivor_rate_hp': (initial_cohort['HP'] / n_hp * 100) if n_hp > 0 else 0,
+                'survivor_rate_mp': (initial_cohort['MP'] / n_mp * 100) if n_mp > 0 else 0,
+                # ヘッドカウント (Tab4用)
+                'headcount_hp': current_hp,
+                'headcount_mp': current_mp
             })
             
         return pd.DataFrame(history), collapse_month
 
 # ==========================================
-# 2. UI コンポーネント (修正版)
+# 2. UI コンポーネント (Ver.4.0)
 # ==========================================
 
 def main():
     with st.sidebar:
-        st.header("⚙️ Settings (Ver.3.2)")
+        st.header("⚙️ Settings")
         
         st.subheader("1. 組織設定")
-        # 【修正箇所】 min_value=10, step=10 に設定変更し、1000名以下も入力可能に
-        n_employees = st.number_input("従業員数 (名)", min_value=10, value=1000, step=10,
-                                      help="最小10名からシミュレーション可能です。")
-        
+        n_employees = st.number_input("従業員数 (名)", min_value=10, value=1000, step=10)
         hp_ratio = st.slider("ハイパフォーマー比率 (%)", 10, 50, 20)
         
-        st.subheader("2. 年収設定 (損益分岐用)")
+        st.subheader("2. 年収設定")
         salary_hp = st.number_input("HP 年収 (万円)", value=1000, step=50)
         salary_mp = st.number_input("MP/LP 年収 (万円)", value=600, step=50)
 
@@ -208,35 +227,38 @@ def main():
         run_btn = st.button("シミュレーション実行", type="primary")
         
         st.markdown("---")
-        st.markdown("**Ver.3.2 (Small Org Support)**")
+        st.markdown("**Ver.4.0 (Advanced Analytics)**")
+        st.markdown("Features: Survival Curve, Heatmap, Tipping Points")
         st.markdown("Created by: Keisuke Nakamura")
 
-    st.title("📉 Strategic Org Resilience Simulator Ver.3.2")
+    st.title("🛡️ Strategic Org Resilience Simulator Ver.4.0")
     st.markdown("""
-    本シミュレーターは、単なるコスト総額ではなく、**「通常の離職・採用サイクルであればかからなかったはずの超過コスト（真の損失）」**を可視化します。
-    100名以下の中小規模組織から、大企業まで幅広く分析可能です。
+    **「生存分析」「リスクヒートマップ」「ティッピングポイント」**を実装したDSSプロトタイプです。
+    組織崩壊の「時期」と「構造」を多角的に診断します。
     """)
 
     if run_btn:
-        with st.spinner('Calculating Budget vs Actual...'):
+        with st.spinner('Calculating Advanced Analytics...'):
             model = AdvancedOrgModel(
                 n_employees, base_turnover, lead_time, hp_ratio, 
                 salary_hp, salary_mp,
                 ramp_up_months=ramp_up, stress_sensitivity=stress_sensitivity
             )
             df, collapse_month = model.run_simulation(duration_months=36)
-            time.sleep(0.5)
+            time.sleep(0.5) # UXのための演出
 
         last = df.iloc[-1]
         
+        # --- アラート: ティッピングポイント (最優先表示) ---
         if collapse_month:
-            st.error(f"⚠️ **組織崩壊**: {collapse_month}ヶ月目に機能不全ラインを突破しました。")
+            st.error(f"⚠️ **Tipping Point Alert**: {collapse_month}ヶ月目に「組織崩壊ライン(有効能力70%未満)」を突破しました。即時の介入が必要です。")
+        else:
+            st.success("✅ **Stable**: 36ヶ月間、組織は健全性を維持しました。")
         
-        st.markdown("### 📊 3年間の経済インパクト分析 (Budget vs Actual)")
+        st.markdown("### 📊 3年間の経済インパクト分析")
         
         col1, col2, col3 = st.columns(3)
         
-        # 0除算対策: 予算コストが極めて小さい場合のハンドリング
         excess_loss = last['cum_excess_cost'] / 10000
         budget_cost = last['cum_budget_cost'] / 10000
         actual_cost = last['cum_actual_cost'] / 10000
@@ -248,75 +270,160 @@ def main():
             delta_str = "予算設定なし"
 
         with col1:
-            st.metric("財務超過損失 (Excess Loss)", 
-                      f"{excess_loss:.1f}億円", 
-                      delta_str,
-                      delta_color="inverse")
-            st.caption(f"採用費実績: {actual_cost:.1f}億 - 通常予算: {budget_cost:.1f}億")
+            st.metric("財務超過損失 (Excess Loss)", f"{excess_loss:.1f}億円", delta_str, delta_color="inverse")
             
         opp_loss = last['cum_opportunity_loss'] / 10000
         with col2:
-            st.metric("機会損失 (Opportunity Loss)", 
-                      f"{opp_loss:.1f}億円",
-                      "売上・付加価値の未達分",
-                      delta_color="inverse")
+            st.metric("機会損失 (Opportunity Loss)", f"{opp_loss:.1f}億円", "Value Destruction", delta_color="inverse")
 
         total_impact = excess_loss + opp_loss
         with col3:
-            st.metric("推定経済損失総額", 
-                      f"{total_impact:.1f}億円",
-                      delta="要・経営介入",
-                      delta_color="inverse")
+            st.metric("推定経済損失総額", f"{total_impact:.1f}億円", delta="Critical", delta_color="inverse")
 
         st.markdown("---")
 
-        tab1, tab2 = st.tabs(["💰 コスト構造の分解", "📉 組織状態"])
+        # ========================================================
+        # Advanced Visualizations Tabs
+        # ========================================================
+        tab1, tab2, tab3, tab4 = st.tabs(["🔥 リスク・ヒートマップ", "📉 生存曲線 (Survival)", "💰 コスト構造", "⚡ 組織状態"])
         
+        # 1. リスク・ヒートマップ (Default Open)
         with tab1:
-            st.subheader("何が無駄な出費（損失）なのか？")
+            st.subheader("複合リスクの時系列ヒートマップ")
+            st.markdown("「負荷」「離職」「損失」が重なる危険地帯（ホットスポット）を特定します。")
+            
+            # データの正規化 (0-1スケール)
+            norm_workload = df['workload_index'] / df['workload_index'].max()
+            norm_leavers = df['leavers_total'] / df['leavers_total'].max()
+            # 損失は累積なので、増加率を見るか、そのまま正規化するか。ここでは絶対量のリスクを見るためそのまま正規化
+            norm_loss = (df['cum_excess_cost'] + df['cum_opportunity_loss'])
+            max_loss = norm_loss.max()
+            if max_loss > 0:
+                norm_loss = norm_loss / max_loss
+            else:
+                norm_loss = norm_loss * 0
+            
+            # ヒートマップ用データ作成
+            # 行: 指標, 列: 月
+            heatmap_z = [
+                norm_workload.tolist(),
+                norm_leavers.tolist(),
+                norm_loss.tolist()
+            ]
+            
+            # ホバー用の実数値テキスト
+            text_workload = [f"{v:.0f}%" for v in df['workload_index']]
+            text_leavers = [f"{v}名" for v in df['leavers_total']]
+            text_loss = [f"{(v/10000):.1f}億" for v in (df['cum_excess_cost'] + df['cum_opportunity_loss'])]
+            
+            heatmap_text = [text_workload, text_leavers, text_loss]
+            
+            fig_heat = go.Figure(data=go.Heatmap(
+                z=heatmap_z,
+                x=df['month'],
+                y=['労働負荷', '月次離職数', '累積損失'],
+                colorscale='RdYlGn_r', # 緑(低) -> 赤(高)
+                text=heatmap_text,
+                texttemplate="", # 文字がごちゃつくので枠内表示はOFF、ホバーのみ推奨だが、要望あれば "%{text}"
+                hovertemplate='月: %{x}<br>%{y}: %{text}<extra></extra>'
+            ))
+            
+            # ティッピングポイントの縦線
+            if collapse_month:
+                fig_heat.add_vline(x=collapse_month, line_width=3, line_dash="dash", line_color="black")
+                fig_heat.add_annotation(x=collapse_month, y=0, text="崩壊点", showarrow=True, arrowhead=1, yshift=10)
+
+            fig_heat.update_layout(height=350, xaxis_title="経過月数", margin=dict(l=50, r=50, t=30, b=30))
+            st.plotly_chart(fig_heat, use_container_width=True)
+            st.caption("💡 解説: 赤色が濃い時期に、組織のリスクがピークに達しています。")
+
+        # 2. 生存曲線
+        with tab2:
+            st.subheader("初期メンバーの生存分析 (Survival Analysis)")
+            st.markdown("組織の記憶と文化を持つ「Day 1 社員」の残存率推移。")
+            
+            fig_surv = go.Figure()
+            
+            # HP Survival
+            fig_surv.add_trace(go.Scatter(
+                x=df['month'], y=df['survivor_rate_hp'],
+                mode='lines', name='ハイパフォーマー(HP) 残存率',
+                line=dict(color='#d62728', width=3)
+            ))
+            
+            # MP Survival
+            fig_surv.add_trace(go.Scatter(
+                x=df['month'], y=df['survivor_rate_mp'],
+                mode='lines', name='一般社員(MP) 残存率',
+                line=dict(color='#1f77b4', width=2)
+            ))
+            
+            # 基準線 (50%)
+            fig_surv.add_hline(y=50, line_dash="dot", annotation_text="Danger Line (50%)", annotation_position="bottom right")
+            
+            fig_surv.update_layout(
+                yaxis_title="残存率 (%)", xaxis_title="経過月数",
+                yaxis_range=[0, 105], height=350,
+                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+            )
+            st.plotly_chart(fig_surv, use_container_width=True)
+
+        # 3. コスト構造
+        with tab3:
+            st.subheader("コスト構造の分解")
             fig_cost = go.Figure()
             
             fig_cost.add_trace(go.Scatter(
                 x=df['month'], y=df['cum_budget_cost']/10000,
-                mode='lines', name='通常採用予算 (Budget)',
-                line=dict(color='gray', dash='dash'),
-                stackgroup='one'
+                mode='lines', name='通常予算 (Budget)',
+                line=dict(color='gray', dash='dash'), stackgroup='one'
             ))
             
             fig_cost.add_trace(go.Scatter(
                 x=df['month'], y=df['cum_excess_cost']/10000,
-                mode='lines', name='超過財務コスト (Excess)',
-                line=dict(color='#d62728'),
-                stackgroup='one'
+                mode='lines', name='超過コスト (Excess)',
+                line=dict(color='#d62728'), stackgroup='one'
             ))
             
             fig_cost.add_trace(go.Scatter(
                 x=df['month'], y=df['cum_opportunity_loss']/10000,
                 mode='lines', name='機会損失 (Opp. Loss)',
-                line=dict(color='#ff7f0e'),
-                stackgroup='one'
+                line=dict(color='#ff7f0e'), stackgroup='one'
             ))
             
-            fig_cost.update_layout(
-                title="累積コストの内訳推移 (億円)",
-                xaxis_title="経過月数", yaxis_title="累積額 (億円)",
-                height=450
-            )
+            if collapse_month:
+                fig_cost.add_vline(x=collapse_month, line_width=1, line_dash="dot", line_color="black")
+
+            fig_cost.update_layout(xaxis_title="経過月数", yaxis_title="累積額 (億円)", height=350)
             st.plotly_chart(fig_cost, use_container_width=True)
 
-        with tab2:
+        # 4. 組織状態
+        with tab4:
+            st.subheader("有効能力と人員構成")
             fig_cap = go.Figure()
+            
             total_headcount = df['headcount_hp'] + df['headcount_mp']
-            # 人数が0の場合は0除算回避
             if n_employees > 0:
                 norm_headcount = (total_headcount / n_employees) * 100
             else:
                 norm_headcount = 0
             
-            fig_cap.add_trace(go.Scatter(x=df['month'], y=norm_headcount, name='人数推移(%)', line=dict(color='gray', dash='dot')))
+            fig_cap.add_trace(go.Scatter(x=df['month'], y=norm_headcount, name='在籍人数(対期初比%)', line=dict(color='gray', dash='dot')))
             fig_cap.add_trace(go.Scatter(x=df['month'], y=df['capacity_ratio'], name='有効能力(%)', line=dict(color='blue', width=3)))
-            fig_cap.add_hrect(y0=0, y1=70, fillcolor="red", opacity=0.1, annotation_text="崩壊ライン")
             
+            # 崩壊ライン強調
+            fig_cap.add_hrect(y0=0, y1=70, fillcolor="red", opacity=0.1, annotation_text="機能不全エリア")
+            
+            # ティッピングポイント アノテーション
+            if collapse_month:
+                fig_cap.add_annotation(
+                    x=collapse_month, y=70,
+                    text="Tipping Point",
+                    showarrow=True, arrowhead=1,
+                    bgcolor="red", bordercolor="white", font=dict(color="white")
+                )
+            
+            fig_cap.update_layout(height=350)
             st.plotly_chart(fig_cap, use_container_width=True)
 
 if __name__ == "__main__":
