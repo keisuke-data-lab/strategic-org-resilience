@@ -82,6 +82,16 @@
 * **Financial Loss:** 予算超過コスト（Excess Cost）と機会損失（Opportunity Loss）の総額。
 * **Survival Curve:** Day 1 メンバーの生存率曲線（組織文化の希薄化指標）。
 * **Risk Heatmap:** リスクがピークに達する時期のヒートマップ可視化。
+## 📌 How to Interpret Results (For Decision Makers)
+
+- **Tipping Point Detected**
+  → 組織機能が連鎖的に低下する閾値。採用・再配置の即時実行が必要。
+
+- **Financial Loss High**
+  → 採用リードタイム短縮 or 負荷分散施策の優先順位を再評価。
+
+- **Survival Curve Steep Decline**
+  → 初期メンバー依存構造が強く、ナレッジ移転設計が必要。
 
 ---
 
