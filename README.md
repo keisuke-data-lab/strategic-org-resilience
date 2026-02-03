@@ -38,7 +38,9 @@ graph TD
 
     style C fill:#f96,stroke:#333,stroke-width:4px
     style B fill:#fff,stroke:#333,stroke-dasharray: 5 5
-🎯 Business Use Cases (Risk Consulting)
+```
+
+## 🎯 Business Use Cases (Risk Consulting)
 本モデルは、人事課題ではなく 「事業継続リスク（BCP）」 として以下の判断を支援します。
 
 Single Point of Failure (SPoF) Detection
@@ -50,19 +52,19 @@ Operational Continuity Assurance
 Project Budget Protection
 採用遅延コスト・機会損失を試算し、追加人員投資のROIを定量評価。
 
-🚀 Ver.4.1: Actionable Features
+## 🚀 Ver.4.1: Actionable Features
 単なる可視化ではなく、介入（Intervention）を前提とした機能を実装しています。
 
-⚠️ Early Failure Signal
+## ⚠️ Early Failure Signal
 組織崩壊に向かう前兆を検知し、アラートを出力。
 
-💊 Automated Prescription
+## 💊 Automated Prescription
 「いつ・どのスキルを・何人補充すべきか」を具体的に提示。
 
-🔥 Risk Hotspot Heatmap
+## 🔥 Risk Hotspot Heatmap
 臨界点を超える部署・時期をヒートマップで特定。
 
-🛠 Structural Modeling Approach
+## 🛠 Structural Modeling Approach
 本モデルは、学術的厳密性よりも 実務的なリスク検知性能 を優先しています。
 
 1. Dependency Network Analysis
@@ -83,7 +85,7 @@ Accumulated Stress
 
 Engagement Score
 
-📊 Outputs & Interpretation
+## 📊 Outputs & Interpretation
 Output Metric	Description	Decision Making
 🚨 Tipping Point Month	自律回復不能となるXデー	採用・配置転換の期限
 📉 Operational Survival Probability	プロジェクト完遂までの生存率	継続 / 撤退判断
