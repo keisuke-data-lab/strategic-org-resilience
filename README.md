@@ -86,11 +86,13 @@ Accumulated Stress
 Engagement Score
 
 ## 📊 Outputs & Interpretation
-Output Metric	Description	Decision Making
-🚨 Tipping Point Month	自律回復不能となるXデー	採用・配置転換の期限
-📉 Operational Survival Probability	プロジェクト完遂までの生存率	継続 / 撤退判断
-💸 Expected Avoidable Loss	早期介入で回避可能な損失	リスク対策予算根拠
-🌡️ Stress Heatmap	部門別負荷集中度	介入優先順位
+| Output Metric                       | Description    | Decision Making |
+| ----------------------------------- | -------------- | --------------- |
+| 🚨 Tipping Point Month              | 自律回復不能となるXデー   | 採用・配置転換の期限      |
+| 📉 Operational Survival Probability | プロジェクト完遂までの生存率 | 継続 / 撤退判断       |
+| 💸 Expected Avoidable Loss          | 早期介入で回避可能な損失   | リスク対策予算根拠       |
+| 🌡️ Stress Heatmap                  | 部門別負荷集中度       | 介入優先順位          |
+
 💻 How to Run
 ⚠️ This is a prototype for structural risk detection, not an HR evaluation tool.
 
