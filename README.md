@@ -104,6 +104,8 @@ pip install -r requirements.txt
 # 3. Run the Early Warning System
 streamlit run app.py
 
-<div align="center"> Author: <b>Keisuke Nakamura</b><br> Risk Modeling / Structural Simulation / Decision Support Systems </div> ```
-🛠 コミットメッセージ（推奨）
+<div align="center"> Author: <b>Keisuke Nakamura</b>
+
+
+Risk Modeling / Structural Simulation / Decision Support Systems </div>🛠 コミットメッセージ（推奨）
 docs: rename to Early-Warning System and refine Executive Summary for operational risk context
