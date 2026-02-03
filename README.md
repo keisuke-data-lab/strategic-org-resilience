@@ -95,7 +95,7 @@ Engagement Score
 
 ## 💻 How to Run
 ⚠️ This is a prototype for structural risk detection, not an HR evaluation tool.
-
+Bash
 # 1. Clone the repository
 git clone [https://github.com/keisuke-data-lab/strategic-org-resilience.git](https://github.com/keisuke-data-lab/strategic-org-resilience.git)
 # 2. Install dependencies
