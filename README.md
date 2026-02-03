@@ -95,6 +95,7 @@ Engagement Score
 
 💻 How to Run
 ⚠️ This is a prototype for structural risk detection, not an HR evaluation tool.
+```mermaid
 # 1. Clone the repository
 git clone https://github.com/keisuke-data-lab/strategic-org-resilience.git
 
@@ -103,6 +104,7 @@ pip install -r requirements.txt
 
 # 3. Run the Early Warning System
 streamlit run app.py
+```
 
 <div align="center"> Author: <b>Keisuke Nakamura</b>
 
