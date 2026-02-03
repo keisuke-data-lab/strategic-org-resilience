@@ -38,10 +38,7 @@ graph TD
 
     style C fill:#f96,stroke:#333,stroke-width:4px
     style B fill:#fff,stroke:#333,stroke-dasharray: 5 5
-```
-
 🎯 Business Use Cases (Risk Consulting)
-
 本モデルは、人事課題ではなく 「事業継続リスク（BCP）」 として以下の判断を支援します。
 
 Single Point of Failure (SPoF) Detection
@@ -54,11 +51,10 @@ Project Budget Protection
 採用遅延コスト・機会損失を試算し、追加人員投資のROIを定量評価。
 
 🚀 Ver.4.1: Actionable Features
-
-単なる可視化ではなく、介入（Intervention） を前提とした機能を実装。
+単なる可視化ではなく、介入（Intervention）を前提とした機能を実装しています。
 
 ⚠️ Early Failure Signal
-組織崩壊に向かう予兆を検知し、アラートを出力。
+組織崩壊に向かう前兆を検知し、アラートを出力。
 
 💊 Automated Prescription
 「いつ・どのスキルを・何人補充すべきか」を具体的に提示。
@@ -67,23 +63,19 @@ Project Budget Protection
 臨界点を超える部署・時期をヒートマップで特定。
 
 🛠 Structural Modeling Approach
-
 本モデルは、学術的厳密性よりも 実務的なリスク検知性能 を優先しています。
 
 1. Dependency Network Analysis
-
 組織を「人 × 業務」の依存ネットワークとしてモデル化。
 PageRank / Betweenness Centrality を用い、
-組織図に現れない 真の業務ボトルネック を抽出。
+組織図に現れない 真の業務ボトルネック を抽出します。
 
 2. Cascading Failure Simulation
-
 物理学の Sandpile Model を応用し、
-1人の離職が引き起こす非線形な連鎖崩壊を再現。
+1人の離職が引き起こす非線形な連鎖崩壊を再現します。
 
 3. Agent-Based State Transition
-
-各エージェントは以下の状態を持ち、動的に遷移します。
+各従業員エージェントは以下の状態を持ち、動的に遷移します：
 
 Capacity Load
 
@@ -98,7 +90,6 @@ Output Metric	Description	Decision Making
 💸 Expected Avoidable Loss	早期介入で回避可能な損失	リスク対策予算根拠
 🌡️ Stress Heatmap	部門別負荷集中度	介入優先順位
 💻 How to Run
-
 ⚠️ This is a prototype for structural risk detection, not an HR evaluation tool.
 
 # 1. Clone the repository
@@ -109,5 +100,6 @@ pip install -r requirements.txt
 
 # 3. Run the Early Warning System
 streamlit run app.py
-
 <div align="center"> Author: <b>Keisuke Nakamura</b><br> Risk Modeling / Structural Simulation / Decision Support Systems </div> ```
+🛠 コミットメッセージ（推奨）
+docs: rename to Early-Warning System and refine Executive Summary for operational risk context
