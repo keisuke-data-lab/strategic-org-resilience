@@ -98,15 +98,12 @@ Engagement Score
 
 # 1. Clone the repository
 git clone [https://github.com/keisuke-data-lab/strategic-org-resilience.git](https://github.com/keisuke-data-lab/strategic-org-resilience.git)
-
 # 2. Install dependencies
 pip install -r requirements.txt
-
 # 3. Run the Early Warning System
 streamlit run app.py
 
 <div align="center"> Author: <b>Keisuke Nakamura</b>
 
 
-Risk Modeling / Structural Simulation / Decision Support Systems </div>🛠 コミットメッセージ（推奨）
-docs: rename to Early-Warning System and refine Executive Summary for operational risk context
+Risk Modeling / Structural Simulation / Decision Support Systems </div>
